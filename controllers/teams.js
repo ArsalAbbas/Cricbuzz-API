@@ -1,4 +1,4 @@
-const { Player } = require('../models/players');
+const Player= require('../models/players');
 
 const handleAddPlayerToTeam=async (req, res) => {
     const { name, role } = req.body;

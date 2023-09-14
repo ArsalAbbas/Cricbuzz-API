@@ -1,4 +1,19 @@
 const Matches = require('../models/matches'); 
+const Players = require('../models/players');
+
+async function getPlayersByTeam(teamId) {
+    try {
+        const players = await Players.findAll({
+            where: {
+                team_name: teamId
+            }
+        });
+        return players;
+    } catch (error) {
+        console.error('Error fetching players by team', error);
+        return [];
+    }
+}
 
 async function handleGetMatchById(req,res){
 
@@ -10,8 +25,14 @@ async function handleGetMatchById(req,res){
         if (!matchById) {
           return res.status(404).json({ error: 'Match not found' });
         }
+        console.log(matchById)      
+
+        const matchStatus= matchById.dataValues.date < new Date() ? "completed" : "upcoming"
+
+        const team1= await getPlayersByTeam(matchById.team1)
+        const team2= await getPlayersByTeam(matchById.team2)  
     
-        return res.status(200).json(matchById)
+        return res.status(200).json({...matchById.dataValues , status: matchStatus, squads: {team_1:team1,team_2:team2}})
     } catch (error) {
         console.error('Error fetching match by ID', error);
         return res.status(500).json({ error: 'Unable to fetch match' });
